@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bittencourt & Barbosa — Gerador de Assinatura</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --midnight: #252f38;
+    --brass: #C9A84C;
+    --brass-light: #e8d08a;
+    --white: #ffffff;
+    --bg: #f4f4f2;
+    --border: #e2ddd6;
+    --text-muted: #888;
+  }
+
+  body {
+    font-family: 'DM Sans', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--midnight);
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--midnight);
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  header img { height: 32px; display: block; }
+
+  header span {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px;
+    color: var(--brass);
+    padding-left: 16px;
+    border-left: 1px solid rgba(201,168,76,0.3);
+    letter-spacing: 0.04em;
+  }
+
+  .container {
+    max-width: 980px;
+    margin: 2.5rem auto;
+    padding: 0 1.5rem;
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+  }
+
+  .card-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--brass);
+    margin-bottom: 1.25rem;
+  }
+
+  label {
+    display: block;
+    font-size: 12px;
+    color: #777;
+    margin-bottom: 4px;
+    margin-top: 14px;
+    font-weight: 500;
+  }
+
+  label:first-of-type { margin-top: 0; }
+
+  select, input[type=text] {
+    width: 100%;
+    padding: 8px 12px;
+    font-family: 'DM Sans', Arial, sans-serif;
+    font-size: 14px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    outline: none;
+    color: var(--midnight);
+    background: #fff;
+    transition: border-color 0.15s;
+    appearance: none;
+  }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 28px;
+  }
+
+  select:focus, input[type=text]:focus { border-color: var(--brass); }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 18px 0;
+  }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+    padding: 10px 12px;
+    background: #faf8f3;
+    border: 1px solid #ede8d8;
+    border-radius: 7px;
+  }
+
+  .toggle-row input[type=checkbox] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--brass);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .toggle-row label {
+    margin: 0;
+    font-size: 13px;
+    color: var(--midnight);
+    cursor: pointer;
+    line-height: 1.3;
+  }
+
+  .toggle-row label span {
+    display: block;
+    font-size: 11px;
+    color: #aaa;
+    margin-top: 1px;
+  }
+
+  .copy-btn {
+    margin-top: 1.25rem;
+    width: 100%;
+    background: var(--midnight);
+    color: var(--white);
+    border: none;
+    border-radius: 7px;
+    padding: 11px 0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: background 0.15s;
+  }
+
+  .copy-btn:hover { background: #1a2229; }
+  .copy-btn.copied { background: #2d6a4f; }
+
+  .instructions {
+    margin-top: 1rem;
+    background: #faf8f3;
+    border: 1px solid #ede8d8;
+    border-radius: 8px;
+    padding: 0.875rem 1rem;
+    font-size: 12.5px;
+    color: #6b5e3a;
+    line-height: 1.75;
+  }
+
+  .instructions strong { font-weight: 600; color: var(--midnight); }
+
+  .instructions ol {
+    padding-left: 1.25rem;
+    margin-top: 6px;
+  }
+
+  .instructions li { margin-bottom: 3px; }
+
+  .preview-label {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--brass);
+    margin-bottom: 0.75rem;
+  }
+
+  .sig-preview {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.75rem 2rem;
+  }
+
+  .preview-note {
+    font-size: 12px;
+    color: #bbb;
+    margin-top: 0.75rem;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 680px) {
+    .container { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <img src="https://static.wixstatic.com/media/5ba30a_94d3f32c504b41208e06e73443a4b035~mv2.png" alt="Bittencourt & Barbosa">
+  <span>Gerador de Assinatura</span>
+</header>
+
+<div class="container">
+
+  <div>
+    <div class="card">
+      <div class="card-title">Seus dados</div>
+
+      <label>Nome</label>
+      <select id="person" onchange="fillFromList()">
+        <option value="">— selecione ou preencha manualmente —</option>
+        <option value="Ana Carolina Almeida de Castro|Advogada Trabalhista|ana.carolina@bittencourtbarbosa.com.br|(21) 97567-0831">Ana Carolina Almeida de Castro</option>
+        <option value="Alessandra Ramos Espinelli|Advogada Trabalhista|alessandra@bittencourtbarbosa.com.br|(21) 99274-3539">Alessandra Ramos Espinelli</option>
+        <option value="Thalita de Mattos Gomes|Advogada Cível|thalita@bittencourtbarbosa.com.br|(21) 99489-3095">Thalita de Mattos Gomes</option>
+        <option value="Deborah da Silva Faria Borges Barbosa|Advogada Cível|deborah@bittencourtbarbosa.com.br|(27) 99983-8833">Deborah da Silva Faria Borges Barbosa</option>
+        <option value="Sandro Marques Cavalcante Silva|Advogado Desportivo|sandro@bittencourtbarbosa.com.br|(21) 99619-6046">Sandro Marques Cavalcante Silva</option>
+        <option value="Heitor Tadros Barroso Aguiar|Advogado Desportivo|heitor@bittencourtbarbosa.com.br|(21) 99922-7701">Heitor Tadros Barroso Aguiar</option>
+        <option value="Paulo Cesar Victer Ferreira|Assessor Desportivo|paulocesar@bittencourtbarbosa.com.br|(21) 98303-3717">Paulo Cesar Victer Ferreira</option>
+        <option value="Leonardo Thire do Amaral|Advogado Tributário|leonardo@bittencourtbarbosa.com.br|(21) 98731-7199">Leonardo Thire do Amaral</option>
+        <option value="Paula Guimarães Woyames|Contadora|financeiro@bittencourtbarbosa.com.br|(21) 99232-6075">Paula Guimarães Woyames</option>
+        <option value="Luis Eduardo Guimarães Borges Barbosa|Sócio|luis@bittencourtbarbosa.com.br|(21) 98487-0839">Luis Eduardo Guimarães Borges Barbosa</option>
+        <option value="Marcelo Ribeiro Mendes|Sócio|marcelo@bittencourtbarbosa.com.br|(21) 97143-3195">Marcelo Ribeiro Mendes</option>
+        <option value="Mário Henrique Guimarães Bittencourt|Sócio|mario@bittencourtbarbosa.com.br|(21) 99807-7633">Mário Henrique Guimarães Bittencourt</option>
+        <option value="Jaqueline de Oliveira Conceição|Secretária|jaqueline@bittencourtbarbosa.com.br|(21) 99254-8436">Jaqueline de Oliveira Conceição</option>
+      </select>
+
+      <div class="divider"></div>
+
+      <label>Nome completo</label>
+      <input type="text" id="name" placeholder="ex: Ana Carolina Almeida de Castro" oninput="render()">
+
+      <label>Cargo</label>
+      <input type="text" id="title" placeholder="ex: Advogada Trabalhista" oninput="render()">
+
+      <label>Telefone celular</label>
+      <input type="text" id="phone" placeholder="ex: (21) 97567-0831" oninput="render()">
+
+      <div class="divider"></div>
+
+      <div class="toggle-row">
+        <input type="checkbox" id="showSelo" onchange="render()">
+        <label for="showSelo">
+          Incluir selo comemorativo
+          <span>20 Anos · Desde 2006</span>
+        </label>
+      </div>
+
+      <button class="copy-btn" id="copyBtn" onclick="copySignature()">
+        Copiar assinatura
+      </button>
+    </div>
+
+    <div class="instructions">
+      <strong>Como adicionar no Outlook:</strong>
+      <ol>
+        <li>Clique em <strong>Copiar assinatura</strong> acima</li>
+        <li>Abra o Outlook → <strong>Arquivo → Opções → Email → Assinaturas</strong></li>
+        <li>Clique em <strong>Nova</strong> e dê um nome (ex: "Assinatura B&B")</li>
+        <li>Clique na área de edição e pressione <strong>Ctrl+V</strong></li>
+        <li>Defina como padrão em <strong>Novas mensagens</strong> e <strong>Respostas/Encaminhamentos</strong></li>
+        <li>Clique em <strong>OK</strong> para salvar</li>
+      </ol>
+    </div>
+  </div>
+
+  <div>
+    <div class="preview-label">Pré-visualização</div>
+    <div class="sig-preview" id="preview"></div>
+    <p class="preview-note">Plus Jakarta Sans exibida aqui onde disponível; Arial usada como substituta em outros ambientes — sem alteração de layout.</p>
+  </div>
+
+</div>
+
+<div id="sig-source" style="position:absolute;left:-9999px;top:-9999px;background:#fff;padding:1rem;" aria-hidden="true"></div>
+
+<script>
+const LOGO_URL = 'https://static.wixstatic.com/media/5ba30a_1d4eb16d41e547bc8eb1c0913c5c3a96~mv2.png';
+const LOGO_SELO_URL = 'https://static.wixstatic.com/media/5ba30a_3eb37d5614704ba69d186c852f91d2d0~mv2.png';
+
+const DOT = `<span style="color:#C9A84C;font-size:7px;vertical-align:middle;padding:0 5px;">&#9679;</span>`;
+const PIPE = `<span style="color:#C9A84C;padding:0 5px;">|</span>`;
+const ADDR1 = `Av. Rio Branco, 251 &ndash; Grupo 1608 ${DOT} Centro &ndash; RJ`;
+const ADDR2 = `CEP 20040-009 ${DOT} Tel.: 2220-2206 ${PIPE} 2240-1465`;
+const WEBSITE = 'bittencourtbarbosa.com.br';
+const WEBSITE_URL = 'https://bittencourtbarbosa.com.br/';
+
+function fillFromList() {
+  const val = document.getElementById('person').value;
+  if (!val) return;
+  const [name, title, email, phone] = val.split('|');
+  document.getElementById('name').value = name;
+  document.getElementById('title').value = title;
+  document.getElementById('phone').value = phone;
+  render();
+}
+
+function buildSignatureHTML(name, title, phone, showSelo) {
+  const fontStack = "'Plus Jakarta Sans', 'DM Sans', Arial, sans-serif";
+  const brass = '#C9A84C';
+  const midnight = '#252f38';
+  const muted = '#666666';
+  const logoSrc = showSelo ? LOGO_SELO_URL : LOGO_URL;
+  const logoWidth = showSelo ? 260 : 190;
+
+  return `<table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;font-family:${fontStack};">
+  <tr>
+    <td style="width:1px;background-color:${brass};padding:0;"></td>
+    <td style="vertical-align:top;padding-left:18px;">
+      <table cellpadding="0" cellspacing="0" border="0">
+
+        <!-- Bloco 1: Info da pessoa -->
+        <tr><td style="padding-bottom:1px;">
+          <span style="font-family:${fontStack};font-size:15px;font-weight:700;color:${midnight};line-height:1.3;">${name || 'Seu Nome'}</span>
+        </td></tr>
+        <tr><td style="padding-bottom:1px;">
+          <span style="font-family:${fontStack};font-size:12px;color:${brass};letter-spacing:0.03em;">${title || 'Cargo'}</span>
+        </td></tr>
+        ${phone ? `<tr><td>
+          <a href="tel:${phone.replace(/\D/g,'')}" style="font-family:${fontStack};font-size:12px;color:${muted};text-decoration:none;">${phone}</a>
+        </td></tr>` : ''}
+
+        <!-- Bloco 2: Logo -->
+        <tr><td style="padding-top:30px;padding-bottom:16px;">
+          <img src="${logoSrc}" alt="Bittencourt & Barbosa" width="${logoWidth}" style="display:block;border:0;height:auto;">
+        </td></tr>
+
+        <!-- Bloco 3: Endereço + Tel + Website -->
+        <tr><td style="padding-bottom:2px;">
+          <span style="font-family:${fontStack};font-size:11px;color:${muted};">${ADDR1}</span>
+        </td></tr>
+        <tr><td style="padding-bottom:2px;">
+          <span style="font-family:${fontStack};font-size:11px;color:${muted};">${ADDR2}</span>
+        </td></tr>
+        <tr><td>
+          <a href="${WEBSITE_URL}" style="font-family:${fontStack};font-size:11px;font-weight:700;color:${brass};text-decoration:none;">${WEBSITE}</a>
+        </td></tr>
+
+      </table>
+    </td>
+  </tr>
+</table>`;
+}
+
+function render() {
+  const name = document.getElementById('name').value;
+  const title = document.getElementById('title').value;
+  const phone = document.getElementById('phone').value;
+  const showSelo = document.getElementById('showSelo').checked;
+  const html = buildSignatureHTML(name, title, phone, showSelo);
+  document.getElementById('preview').innerHTML = html;
+  document.getElementById('sig-source').innerHTML = html;
+}
+
+function copySignature() {
+  const el = document.getElementById('sig-source');
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  document.execCommand('copy');
+  sel.removeAllRanges();
+
+  const btn = document.getElementById('copyBtn');
+  btn.classList.add('copied');
+  btn.textContent = '✓ Copiado — cole no Outlook';
+  setTimeout(() => {
+    btn.classList.remove('copied');
+    btn.textContent = 'Copiar assinatura';
+  }, 3000);
+}
+
+render();
+</script>
+</body>
+</html>
